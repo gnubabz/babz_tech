@@ -1,0 +1,6 @@
+---
+# vars file for joomla
+mysql_root_password: redhat
+joomla_password: joomla
+
+

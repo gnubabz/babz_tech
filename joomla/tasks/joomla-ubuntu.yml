@@ -1,0 +1,125 @@
+---
+ - name: Install Joomla for  Ubuntu 
+   apt: 
+    pkg:
+        - apache2
+        - libapache2-mod-php
+        - openssl
+        - php-imagick
+        - php-common
+        - php-curl
+        - php-gd
+        - php-imap
+        - php-intl
+        - php-json
+        - php-ldap
+        - php-mbstring
+        - php-mysql
+        - php-pgsql
+        - php-smbclient
+        - php-ssh2
+        - php-sqlite3
+        - php-xml
+        - php-zip
+        - mariadb-server
+        - python3-pip
+        - python3-dev
+        - python3-mysqldb
+    state: latest
+        
+ 
+ - name: Start apache2
+   service:
+        name: apache2
+        state: started
+        enabled: true
+
+ - name: delete anonymous MySQL server user for {{ ansible_hostname }}
+   action: mysql_user user="" host="{{ ansible_hostname }}" state="absent"
+ 
+ - name: delete anonymous MySQL server user for localhost
+   action: mysql_user user="" state="absent"
+ 
+ - name: remove the MySQL test database
+   action: mysql_db db=test state=absent
+   
+   
+# 'localhost' needs to be the last item for idempotency, see
+# http://ansible.cc/docs/modules.html#mysql-user   
+ - name: Change root user password on first run
+   mysql_user: login_user=root
+              login_password=''
+              name=root
+              password={{ mysql_root_password }}
+              priv=*.*:ALL,GRANT
+              host={{ item }}
+   with_items:
+        - "{{ ansible_hostname }}"
+        - 127.0.0.1
+        - ::1
+        - localhost
+ - name: Create new databases for joomla
+   mysql_db:
+     name: joomla_db
+     state: present
+
+ - name: Change root user password on first run
+   mysql_user: name=joomla
+               password={{ joomla_password }}
+               priv=joomla_db.*:ALL,GRANT
+               host={{ item }}
+   with_items:
+        - "{{ ansible_hostname }}"
+        - 127.0.0.1
+        - ::1
+        - localhost
+
+ - name: Create a directory joomla
+   file:
+     path: /var/www/html/joomla
+     state: directory
+     mode: '0755'
+ 
+ - name: Extract joomla
+   unarchive:
+    src: https://downloads.joomla.org/cms/joomla3/3-9-16/Joomla_3-9-16-Stable-Full_Package.zip
+    dest: /var/www/html/joomla
+    remote_src: yes
+ - name: Recursively change ownership joomla
+   file:
+     path: /var/www/html/joomla
+     state: directory
+     recurse: yes
+     owner: www-data
+     group: www-data
+     mode: '0755'
+ - name: Restart apache2
+   service:
+        name: apache2
+        state: restarted
+        enabled: true
+ - name: joomla conf
+   template:
+     src: templates/joomla.conf.j2
+     dest: /etc/apache2/sites-available/joomla.conf
+     owner: www-data
+     group: www-data
+     mode: '0755'
+ - name: a2ensite joomla.conf
+   command: a2ensite joomla.conf
+  
+ - name: enabled mod_rewrite
+   apache2_module: name=rewrite state=present
+   
+ - name: Restart apache2
+   service:
+        name: apache2
+        state: restarted
+        enabled: true
+
+
+
+
+ 
+
+                         

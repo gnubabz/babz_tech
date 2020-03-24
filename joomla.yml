@@ -1,0 +1,15 @@
+#$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$#
+#                                                                      #
+#         Joomla playbook                                              #
+#         Version:      01                                             #
+#         Auther:      Babu Vijayanath                                 #
+#                                                                      #
+#$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$#
+
+---
+ - hosts: 192.168.56.18
+   become: yes
+   become_method: sudo
+   gather_facts: true
+   roles:
+        - joomla

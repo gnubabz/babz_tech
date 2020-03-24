@@ -1,0 +1,11 @@
+---
+# tasks file for NRPE
+#- name: install & configure NRPE
+# hosts: all
+# become: yes
+#
+#  become_method: sudo
+# gather_facts: true
+- name: Install  joomla for Ubuntu/Debian
+  import_tasks: joomla-ubuntu.yml
+  when: ansible_distribution == 'Ubuntu'
