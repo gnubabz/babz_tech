@@ -63,7 +63,7 @@
      name: joomla_db
      state: present
 
- - name: Change root user password on first run
+ - name: Change user password on first run
    mysql_user: name=joomla
                password={{ joomla_password }}
                priv=joomla_db.*:ALL,GRANT
